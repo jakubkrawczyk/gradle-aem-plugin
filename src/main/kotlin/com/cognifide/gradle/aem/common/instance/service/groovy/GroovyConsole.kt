@@ -5,7 +5,6 @@ import com.cognifide.gradle.aem.common.instance.InstanceException
 import com.cognifide.gradle.aem.common.instance.InstanceService
 import com.cognifide.gradle.aem.common.instance.InstanceSync
 import com.cognifide.gradle.aem.common.utils.Formats
-import com.cognifide.gradle.aem.common.utils.Patterns
 import java.io.File
 
 /**
@@ -86,9 +85,9 @@ class GroovyConsole(sync: InstanceSync) : InstanceService(sync) {
      * Evaluate all Groovy scripts found by file name pattern on AEM instance in path-based alphabetical order.
      */
     fun evalScripts(fileNamePattern: String = "**/*.groovy", data: Map<String, Any> = mapOf()): Sequence<GroovyConsoleResult> {
-        val scripts = (scriptRootDir.listFiles() ?: arrayOf()).filter {
-            Patterns.wildcard(it, fileNamePattern)
-        }.sortedBy { it.absolutePath }
+        val scripts = aem.project.fileTree(scriptRootDir)
+                .matching { it.include(fileNamePattern) }
+                .sortedBy { it.absolutePath }
         if (scripts.isEmpty()) {
             throw AemException("No Groovy scripts found in directory: $scriptRootDir")
         }
